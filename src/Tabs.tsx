@@ -2,17 +2,24 @@
 
 import { useRef, useState } from "react";
 
+import { TabEnum } from "./TabsEnum";
 import styled from "styled-components";
 
+interface Props {
+  selectedTab: number;
+  setSelectedTab: React.Dispatch<React.SetStateAction<TabEnum>>;
+}
+
 const tabsData = [
-  { title: "Home", value: "home" },
-  { title: "Craft", value: "craft" },
-  { title: "Words", value: "words" },
-  { title: "Photos", value: "photos" },
-  { title: "Social", value: "social" },
+  { title: "Home", value: TabEnum.HOME },
+  { title: "Craft", value: TabEnum.CRAFT },
+  { title: "Words", value: TabEnum.WORDS },
+  { title: "Photos", value: TabEnum.PHOTOS },
+  { title: "Social", value: TabEnum.SOCIAL },
 ];
 
-const Tabs = () => {
+const Tabs = (props: Props) => {
+  const { selectedTab, setSelectedTab } = props;
   const [tabBoundingBox, setTabBoundingBox] = useState(null);
   const [wrapperBoundingBox, setWrapperBoundingBox] = useState(null);
   const [highlightedTab, setHighlightedTab] = useState(null);
@@ -48,16 +55,33 @@ const Tabs = () => {
   return (
     <TabsNav ref={wrapperRef} onMouseLeave={resetHighlight}>
       <TabsHighlight ref={highlightRef} style={highlightStyles} />
-      {tabsData.map((tab) => (
-        <Tab
-          key={tab.value}
-          onMouseOver={(ev) => repositionHighlight(ev, tab)}
-          onMouseDown={() => setIsBeingPressed(() => true)}
-          onMouseUp={() => setIsBeingPressed(() => false)}
-        >
-          {tab.title}
-        </Tab>
-      ))}
+      {tabsData.map((tab) => {
+        return selectedTab !== tab.value ? (
+          <Tab
+            key={tab.value}
+            onMouseOver={(ev) => repositionHighlight(ev, tab)}
+            onMouseDown={() => setIsBeingPressed(() => true)}
+            onMouseUp={() => {
+              setIsBeingPressed(() => false);
+              setSelectedTab(() => tab.value);
+            }}
+          >
+            {tab.title}
+          </Tab>
+        ) : (
+          <SelectedTab
+            key={tab.value}
+            onMouseOver={(ev) => repositionHighlight(ev, tab)}
+            onMouseDown={() => setIsBeingPressed(() => true)}
+            onMouseUp={() => {
+              setIsBeingPressed(() => false);
+              setSelectedTab(() => tab.value);
+            }}
+          >
+            {tab.title}
+          </SelectedTab>
+        );
+      })}
     </TabsNav>
   );
 };
@@ -77,9 +101,24 @@ const Tab = styled.a`
   display: inline-block;
   position: relative;
   cursor: pointer;
+  transition: color 50ms;
+  height: 100%;
+  user-select: none;
+`;
+
+const SelectedTab = styled.a`
+  padding: 15px;
+  font-size: ${14 / 16}rem;
+  color: rgb(200, 200, 200);
+  display: inline-block;
+  position: relative;
+  cursor: pointer;
   transition: color 250ms;
   height: 100%;
   user-select: none;
+  box-shadow: inset 1px 1px 2px 1px rgb(29, 29, 29);
+  background: rgb(90, 90, 90);
+  border-radius: 8px;
 `;
 
 const TabsHighlight = styled.div`
@@ -91,6 +130,7 @@ const TabsHighlight = styled.div`
   height: 48px;
   transition: 0.15s ease;
   transition-property: width, transform, opacity;
+  border: 1px rgb(20, 20, 20) solid;
 `;
 
 export default Tabs;
