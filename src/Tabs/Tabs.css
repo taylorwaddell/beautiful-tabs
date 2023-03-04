@@ -1,0 +1,20 @@
+/* ul {
+  list-style: none;
+  display: flex;
+  color: rgb(41, 41, 41);
+  background-color: rgb(20, 20, 20);
+  border-radius: 10px;
+  padding: 5px;
+}
+
+li {
+  padding: 15px;
+  cursor: pointer;
+  border-radius: 8px;
+  height: 100%;
+  width: 100%;
+}
+
+li:hover {
+  background-color: rgb(160, 160, 160);
+} */
