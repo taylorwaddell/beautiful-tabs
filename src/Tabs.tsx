@@ -75,37 +75,22 @@ const Tabs = (props: Props) => {
         onMouseOut={() => setShowShortcutPrompts(() => false)}
       >
         <TabsHighlight ref={highlightRef} style={highlightStyles} />
-        {tabsData.map((tab) => {
-          return selectedTab !== tab.value ? (
-            <Tab
-              key={tab.value}
-              tabValue={tab.value}
-              showShortcutPrompts={showShortcutPrompts}
-              onMouseOver={(ev) => repositionHighlight(ev, tab)}
-              onMouseDown={() => setIsBeingPressed(() => true)}
-              onMouseUp={() => {
-                setIsBeingPressed(() => false);
-                setSelectedTab(() => tab.value);
-              }}
-            >
-              {tab.title}
-            </Tab>
-          ) : (
-            <SelectedTab
-              key={tab.value}
-              tabValue={tab.value}
-              showShortcutPrompts={showShortcutPrompts}
-              onMouseOver={(ev) => repositionHighlight(ev, tab)}
-              onMouseDown={() => setIsBeingPressed(() => true)}
-              onMouseUp={() => {
-                setIsBeingPressed(() => false);
-                setSelectedTab(() => tab.value);
-              }}
-            >
-              {tab.title}
-            </SelectedTab>
-          );
-        })}
+        {tabsData.map((tab) => (
+          <Tab
+            key={tab.value}
+            tabValue={tab.value}
+            showShortcutPrompts={showShortcutPrompts}
+            isSelectedTab={selectedTab !== tab.value}
+            onMouseOver={(ev) => repositionHighlight(ev, tab)}
+            onMouseDown={() => setIsBeingPressed(() => true)}
+            onMouseUp={() => {
+              setIsBeingPressed(() => false);
+              setSelectedTab(() => tab.value);
+            }}
+          >
+            {tab.title}
+          </Tab>
+        ))}
       </TabsNav>
     </ContainerFlexColumn>
   );
@@ -114,6 +99,7 @@ const Tabs = (props: Props) => {
 interface TabProps {
   tabValue: number;
   showShortcutPrompts: boolean;
+  isSelectedTab: boolean;
 }
 
 const TabsNav = styled.div`
@@ -136,47 +122,20 @@ const Tab = styled.a<TabProps>`
   display: inline-block;
   position: relative;
   cursor: pointer;
-  transition: color 50ms;
-  height: 100%;
-  user-select: none;
-
-  ${(props) => {
-    if (props.showShortcutPrompts) {
-      return css`
-        &::after {
-          content: "${props.tabValue}";
-          position: absolute;
-          bottom: -32px;
-          left: 36%;
-          background: rgb(90, 90, 90);
-          border-radius: 3px;
-          padding: 4px 7px;
-          color: rgb(229, 229, 229);
-          box-shadow: rgb(229 229 229) 0px 0px 2px 0px inset;
-          font-size: ${10 / 14}rem;
-          display: flex;
-          width: 20px;
-          opacity: 0;
-          animation: ${fadeIn} 500ms linear 1.25s 1 forwards;
-        }
-      `;
-    }
-  }}
-`;
-
-const SelectedTab = styled.a`
-  padding: 15px;
-  font-size: ${14 / 16}rem;
-  color: rgb(200, 200, 200);
-  display: inline-block;
-  position: relative;
-  cursor: pointer;
   transition: color 250ms;
   height: 100%;
   user-select: none;
-  box-shadow: inset 1px 1px 2px 1px rgb(29, 29, 29);
-  background: rgb(90, 90, 90);
-  border-radius: 8px;
+
+  ${(props) => {
+    if (!props.isSelectedTab) {
+      return css`
+        background: rgb(90, 90, 90);
+        border-radius: 8px;
+        box-shadow: inset 1px 1px 2px 1px rgb(29, 29, 29);
+        color: rgb(200, 200, 200);
+      `;
+    }
+  }}
 
   ${(props) => {
     if (props.showShortcutPrompts) {
@@ -195,7 +154,7 @@ const SelectedTab = styled.a`
           display: flex;
           width: 20px;
           opacity: 0;
-          animation: ${fadeIn} 500ms linear 1.25s 1 forwards;
+          animation: ${fadeIn} 500ms linear 1.75s 1 forwards;
         }
       `;
     }
