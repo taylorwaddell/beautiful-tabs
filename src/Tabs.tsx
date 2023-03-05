@@ -1,14 +1,9 @@
 // @ts-nocheck
 
-import { useRef, useState } from "react";
+import styled, { css, keyframes } from "styled-components";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { TabEnum } from "./TabsEnum";
-import styled from "styled-components";
-
-interface Props {
-  selectedTab: number;
-  setSelectedTab: React.Dispatch<React.SetStateAction<TabEnum>>;
-}
 
 const tabsData = [
   { title: "Home", value: TabEnum.HOME },
@@ -25,9 +20,28 @@ const Tabs = (props: Props) => {
   const [highlightedTab, setHighlightedTab] = useState(null);
   const [isHoveredFromNull, setIsHoveredFromNull] = useState(true);
   const [isBeingPressed, setIsBeingPressed] = useState(false);
+  const [showShortcutPrompts, setShowShortcutPrompts] = useState(false);
 
   const highlightRef = useRef(null);
   const wrapperRef = useRef(null);
+
+  const handleKeyPress = useCallback(
+    (event) => {
+      if (event.key === "1") setSelectedTab(() => 1);
+      if (event.key === "2") setSelectedTab(() => 2);
+      if (event.key === "3") setSelectedTab(() => 3);
+      if (event.key === "4") setSelectedTab(() => 4);
+      if (event.key === "5") setSelectedTab(() => 5);
+    },
+    [setSelectedTab]
+  );
+
+  useEffect(() => {
+    document.addEventListener("keydown", handleKeyPress);
+    return () => {
+      document.removeEventListener("keydown", handleKeyPress);
+    };
+  }, [handleKeyPress]);
 
   const repositionHighlight = (e: MouseEvent, tab: unknown) => {
     setTabBoundingBox(e.target.getBoundingClientRect());
@@ -53,38 +67,54 @@ const Tabs = (props: Props) => {
   }
 
   return (
-    <TabsNav ref={wrapperRef} onMouseLeave={resetHighlight}>
-      <TabsHighlight ref={highlightRef} style={highlightStyles} />
-      {tabsData.map((tab) => {
-        return selectedTab !== tab.value ? (
-          <Tab
-            key={tab.value}
-            onMouseOver={(ev) => repositionHighlight(ev, tab)}
-            onMouseDown={() => setIsBeingPressed(() => true)}
-            onMouseUp={() => {
-              setIsBeingPressed(() => false);
-              setSelectedTab(() => tab.value);
-            }}
-          >
-            {tab.title}
-          </Tab>
-        ) : (
-          <SelectedTab
-            key={tab.value}
-            onMouseOver={(ev) => repositionHighlight(ev, tab)}
-            onMouseDown={() => setIsBeingPressed(() => true)}
-            onMouseUp={() => {
-              setIsBeingPressed(() => false);
-              setSelectedTab(() => tab.value);
-            }}
-          >
-            {tab.title}
-          </SelectedTab>
-        );
-      })}
-    </TabsNav>
+    <ContainerFlexColumn>
+      <TabsNav
+        ref={wrapperRef}
+        onMouseLeave={resetHighlight}
+        onMouseOver={() => setShowShortcutPrompts(() => true)}
+        onMouseOut={() => setShowShortcutPrompts(() => false)}
+      >
+        <TabsHighlight ref={highlightRef} style={highlightStyles} />
+        {tabsData.map((tab) => {
+          return selectedTab !== tab.value ? (
+            <Tab
+              key={tab.value}
+              tabValue={tab.value}
+              showShortcutPrompts={showShortcutPrompts}
+              onMouseOver={(ev) => repositionHighlight(ev, tab)}
+              onMouseDown={() => setIsBeingPressed(() => true)}
+              onMouseUp={() => {
+                setIsBeingPressed(() => false);
+                setSelectedTab(() => tab.value);
+              }}
+            >
+              {tab.title}
+            </Tab>
+          ) : (
+            <SelectedTab
+              key={tab.value}
+              tabValue={tab.value}
+              showShortcutPrompts={showShortcutPrompts}
+              onMouseOver={(ev) => repositionHighlight(ev, tab)}
+              onMouseDown={() => setIsBeingPressed(() => true)}
+              onMouseUp={() => {
+                setIsBeingPressed(() => false);
+                setSelectedTab(() => tab.value);
+              }}
+            >
+              {tab.title}
+            </SelectedTab>
+          );
+        })}
+      </TabsNav>
+    </ContainerFlexColumn>
   );
 };
+
+interface TabProps {
+  tabValue: number;
+  showShortcutPrompts: boolean;
+}
 
 const TabsNav = styled.div`
   position: relative;
@@ -94,7 +124,12 @@ const TabsNav = styled.div`
   padding: 5px;
 `;
 
-const Tab = styled.a`
+const fadeIn = keyframes`
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}`;
+
+const Tab = styled.a<TabProps>`
   padding: 15px;
   font-size: ${14 / 16}rem;
   color: rgb(229, 229, 229);
@@ -104,6 +139,29 @@ const Tab = styled.a`
   transition: color 50ms;
   height: 100%;
   user-select: none;
+
+  ${(props) => {
+    if (props.showShortcutPrompts) {
+      return css`
+        &::after {
+          content: "${props.tabValue}";
+          position: absolute;
+          bottom: -32px;
+          left: 36%;
+          background: rgb(90, 90, 90);
+          border-radius: 3px;
+          padding: 4px 7px;
+          color: rgb(229, 229, 229);
+          box-shadow: rgb(229 229 229) 0px 0px 2px 0px inset;
+          font-size: ${10 / 14}rem;
+          display: flex;
+          width: 20px;
+          opacity: 0;
+          animation: ${fadeIn} 500ms linear 1.25s 1 forwards;
+        }
+      `;
+    }
+  }}
 `;
 
 const SelectedTab = styled.a`
@@ -119,6 +177,29 @@ const SelectedTab = styled.a`
   box-shadow: inset 1px 1px 2px 1px rgb(29, 29, 29);
   background: rgb(90, 90, 90);
   border-radius: 8px;
+
+  ${(props) => {
+    if (props.showShortcutPrompts) {
+      return css`
+        &::after {
+          content: "${props.tabValue}";
+          position: absolute;
+          bottom: -32px;
+          left: 36%;
+          background: rgb(90, 90, 90);
+          border-radius: 3px;
+          padding: 4px 7px;
+          color: rgb(229, 229, 229);
+          box-shadow: rgb(229 229 229) 0px 0px 2px 0px inset;
+          font-size: ${10 / 14}rem;
+          display: flex;
+          width: 20px;
+          opacity: 0;
+          animation: ${fadeIn} 500ms linear 1.25s 1 forwards;
+        }
+      `;
+    }
+  }}
 `;
 
 const TabsHighlight = styled.div`
@@ -131,6 +212,11 @@ const TabsHighlight = styled.div`
   transition: 0.15s ease;
   transition-property: width, transform, opacity;
   border: 1px rgb(20, 20, 20) solid;
+`;
+
+const ContainerFlexColumn = styled.div`
+  display: flex;
+  flex-direction: column;
 `;
 
 export default Tabs;

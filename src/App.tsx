@@ -8,7 +8,7 @@ const App = () => {
   const [selectedTab, setSelectedTab] = useState(TabEnum.HOME);
   return (
     <div className="main">
-      <Tabs selectedTab={selectedTab} setSelectedTab={setSelectedTab} />
+      <Tabs selectedTab={selectedTab} setSelectedTab={setSelectedTab} whyNot={'2'} />
     </div>
   );
 };
